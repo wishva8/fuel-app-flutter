@@ -1,4 +1,14 @@
+/*
+* Fuel App
+*
+* EAD ASSIGNMENT - 2022
+* IT19040172 Perera T.W.I.V <it19040172@my.sliit.lk>
+* IT19035086 Amarathunga A.A.H.S.B. <it19035086@my.sliit.lk>
+*/
 import 'package:flutter/material.dart';
+import 'package:fuel_app/services/database.dart';
+
+import 'login.dart';
 
 class CustomerRegistration extends StatefulWidget {
   const CustomerRegistration({Key? key}) : super(key: key);
@@ -185,7 +195,12 @@ class _CustomerRegistrationState extends State<CustomerRegistration> {
                   ),
                   RaisedButton(
                     onPressed: () async {
-                      print("hereeeeee");
+                      await DatabaseService().insertCustomer(
+                          firstname, lastname, email, nic, password);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => Login()),
+                      );
                     },
                     color: Colors.orange,
                     padding: EdgeInsets.symmetric(horizontal: 50),

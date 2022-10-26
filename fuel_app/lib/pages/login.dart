@@ -1,6 +1,16 @@
+/*
+* Fuel App
+*
+* EAD ASSIGNMENT - 2022
+* IT19040172 Perera T.W.I.V <it19040172@my.sliit.lk>
+* IT19035086 Amarathunga A.A.H.S.B. <it19035086@my.sliit.lk>
+*/
 import 'package:flutter/material.dart';
 import 'package:fuel_app/pages/customer_registration.dart';
-import 'package:fuel_app/pages/station_customer.dart';
+import 'package:fuel_app/pages/home_customer.dart';
+import 'package:fuel_app/pages/home_station.dart';
+import 'package:fuel_app/pages/station_registration.dart';
+import 'package:fuel_app/services/database.dart';
 
 class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);
@@ -9,7 +19,9 @@ class Login extends StatefulWidget {
   State<Login> createState() => _LoginState();
 }
 
+//Login UI design
 class _LoginState extends State<Login> {
+  //variable declaration for login form
   var nic = "";
   var password = "";
   @override
@@ -91,7 +103,30 @@ class _LoginState extends State<Login> {
                   margin: const EdgeInsets.symmetric(horizontal: 50),
                   child: RaisedButton(
                     onPressed: () async {
-                      print("hereeeeee");
+                      int isAuth = await DatabaseService().login(nic, password);
+                      if (isAuth == 2) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => HomeCustomer()),
+                        );
+                      } else if (isAuth == 1) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => HomeStation()),
+                        );
+                      } else {
+                        return showDialog(
+                          context: context,
+                          builder: (context) {
+                            return const AlertDialog(
+                              content:
+                                  Text('Username or password is incorrect'),
+                            );
+                          },
+                        );
+                      }
                     },
                     color: Colors.orange,
                     padding: EdgeInsets.symmetric(horizontal: 50),
