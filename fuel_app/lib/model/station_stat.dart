@@ -10,26 +10,26 @@ class StationStat {
   var stationID;
   var location;
   var petrol;
-  var disal;
+  var diesel;
   var petrolWaitingTime;
-  var disalWaitingTime;
+  var dieselWaitingTime;
   StationStat({
     required this.stationID,
     required this.location,
     required this.petrol,
-    required this.disal,
+    required this.diesel,
     required this.petrolWaitingTime,
-    required this.disalWaitingTime,
+    required this.dieselWaitingTime,
   });
 
   factory StationStat.fromJson(Map<dynamic, dynamic> json) {
     return StationStat(
-      stationID:json['stationID'],
+      stationID:json['stationId'],
       location:json['location'],
       petrol:json['petrol'],
-      disal:json['disal'],
+      diesel:json['diesel'],
       petrolWaitingTime:json['petrolWaitingTime'],
-      disalWaitingTime:json['disalWaitingTime'],
+      dieselWaitingTime:json['dieselWaitingTime'],
     );
   }
 }

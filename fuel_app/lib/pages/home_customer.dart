@@ -27,13 +27,13 @@ class _HomeCustomerState extends State<HomeCustomer> {
 
   List<StationStat> ulist = [];
   List<StationStat> stationLists = [];
-  
+
   //API call for All StationStat List
-  String url = 'https://mocki.io/v1/00ff72a2-bf5e-4351-b9a7-3958e9e2a6c3';
+  String url = "https://fuel-app-ead.herokuapp.com";
 
   Future<List<StationStat>> getAllulistList() async {
     try {
-      final response = await http.get(Uri.parse(url));
+      final response = await http.get(Uri.parse(url + "/fuel/getStations"));
       if (response.statusCode == 200) {
         // print(response.body);
         List<StationStat> list = parseAgents(response.body);
@@ -49,7 +49,9 @@ class _HomeCustomerState extends State<HomeCustomer> {
   //Decode the body and rearrenged the data
   static List<StationStat> parseAgents(String responseBody) {
     final parsed = json.decode(responseBody).cast<Map<String, dynamic>>();
-    return parsed.map<StationStat>((json) => StationStat.fromJson(json)).toList();
+    return parsed
+        .map<StationStat>((json) => StationStat.fromJson(json))
+        .toList();
   }
 
   //Initial API call
@@ -141,17 +143,30 @@ class _HomeCustomerState extends State<HomeCustomer> {
                             style: TextStyle(fontSize: 16),
                           ),
                           subtitle: Text(
-                            "Petrol waiting Time: "+(stationLists[index].petrolWaitingTime?? "null") +" min\nDisal waiting Time: "+(stationLists[index].disalWaitingTime?? "null") +" min" ,
+                            "Petrol waiting Time: " +
+                                (stationLists[index].petrol == 1
+                                    ? stationLists[index]
+                                            .petrolWaitingTime
+                                            .toString() +
+                                        " min"
+                                    : "No Fuel") +
+                                "\nDiesel waiting Time: " +
+                                (stationLists[index].diesel == 1
+                                    ? stationLists[index]
+                                            .dieselWaitingTime
+                                            .toString() +
+                                        " min"
+                                    : "No Fuel"),
                             style: TextStyle(fontSize: 16),
                           ),
-                          
                           onTap: () {
-                                 Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => StationDetails(station:stationLists[index]),
-            ),
-          );
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => StationDetails(
+                                    station: stationLists[index]),
+                              ),
+                            );
                           },
                         )
                       ],

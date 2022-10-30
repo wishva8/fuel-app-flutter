@@ -5,8 +5,12 @@
 * IT19040172 Perera T.W.I.V <it19040172@my.sliit.lk>
 * IT19035086 Amarathunga A.A.H.S.B. <it19035086@my.sliit.lk>
 */
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:fuel_app/model/station_stat.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
 class StationDetails extends StatelessWidget {
   final StationStat station;
@@ -72,12 +76,14 @@ class StationDetails extends StatelessWidget {
                     ),
                     Text(
                       "Waiting Time : " +
-                          (station.disal == 1
-                              ? station.petrolWaitingTime + " min"
+                          (station.petrol == 1
+                              ? station.petrolWaitingTime.toString() + " min"
                               : "No queue"),
                       style: TextStyle(fontSize: 16),
                     ),
-                    SizedBox(height: 20,),
+                    SizedBox(
+                      height: 20,
+                    ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -85,15 +91,38 @@ class StationDetails extends StatelessWidget {
                           padding: EdgeInsets.symmetric(horizontal: 30),
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20)),
-                          onPressed: () => Navigator.of(context).pop(),
-                          child: Text("Exit Queue",
+                          onPressed: () => {
+                            deparAndExitFuelQueue(
+                                station.stationID, "Petrol", "departQueue"),
+                            showDialog(
+                              context: context,
+                              builder: (context) {
+                                return const AlertDialog(
+                                  content: Text(
+                                      'You have Departed from Petrol Queue'),
+                                );
+                              },
+                            )
+                          },
+                          child: Text("Depart Queue",
                               style: TextStyle(
                                   fontSize: 14,
                                   letterSpacing: 2.2,
                                   color: Colors.black)),
                         ),
                         RaisedButton(
-                          onPressed: () async {},
+                          onPressed: () async {
+                            enterFuelQueue(station.stationID, "Petrol");
+                            showDialog(
+                              context: context,
+                              builder: (context) {
+                                return const AlertDialog(
+                                  content:
+                                      Text('You have enterd a Petrol Queue'),
+                                );
+                              },
+                            );
+                          },
                           color: Colors.green,
                           padding: EdgeInsets.symmetric(horizontal: 30),
                           elevation: 2,
@@ -125,7 +154,7 @@ class StationDetails extends StatelessWidget {
                       height: 20,
                     ),
                     Text(
-                      "Availability : " + (station.disal == 1 ? " ✔ " : " ❌ "),
+                      "Availability : " + (station.diesel == 1 ? " ✔ " : " ❌ "),
                       style: TextStyle(
                         fontSize: 16,
                       ),
@@ -135,12 +164,14 @@ class StationDetails extends StatelessWidget {
                     ),
                     Text(
                       "Waiting Time : " +
-                          (station.disal == 1
-                              ? station.disalWaitingTime + " min"
+                          (station.diesel == 1
+                              ? station.dieselWaitingTime.toString() + " min"
                               : "No queue"),
                       style: TextStyle(fontSize: 16),
                     ),
-                    SizedBox(height: 20,),
+                    SizedBox(
+                      height: 20,
+                    ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -148,15 +179,38 @@ class StationDetails extends StatelessWidget {
                           padding: EdgeInsets.symmetric(horizontal: 30),
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20)),
-                          onPressed: () => Navigator.of(context).pop(),
-                          child: Text("Exit Queue",
+                          onPressed: () => {
+                            deparAndExitFuelQueue(
+                                station.stationID, "Diesel", "departQueue"),
+                            showDialog(
+                              context: context,
+                              builder: (context) {
+                                return const AlertDialog(
+                                  content: Text(
+                                      'You have Departed from Diesel Queue'),
+                                );
+                              },
+                            )
+                          },
+                          child: Text("Depart Queue",
                               style: TextStyle(
                                   fontSize: 14,
                                   letterSpacing: 2.2,
                                   color: Colors.black)),
                         ),
                         RaisedButton(
-                          onPressed: () async {},
+                          onPressed: () async {
+                            enterFuelQueue(station.stationID, "Diesel");
+                            showDialog(
+                              context: context,
+                              builder: (context) {
+                                return const AlertDialog(
+                                  content:
+                                      Text('You have enterd a Diesel Queue'),
+                                );
+                              },
+                            );
+                          },
                           color: Colors.green,
                           padding: EdgeInsets.symmetric(horizontal: 30),
                           elevation: 2,
@@ -178,5 +232,46 @@ class StationDetails extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void deparAndExitFuelQueue(stationID, fuelType, updatedItem) async {
+    const String BASE_URL = "https://fuel-app-ead.herokuapp.com";
+    Map<String, String> headers = {'Content-Type': 'application/json'};
+    final prefs = await SharedPreferences.getInstance();
+    var nic = await prefs.getString("nic");
+    var client = getClient();
+    var uri = BASE_URL + "/customer/" + updatedItem + "?nic=" + nic!;
+    print(uri);
+    try {
+      var response = await client.post(Uri.parse(uri), headers: headers);
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  void enterFuelQueue(stationID, fuelType) async {
+    const String BASE_URL = "https://fuel-app-ead.herokuapp.com";
+    Map<String, String> headers = {'Content-Type': 'application/json'};
+    final prefs = await SharedPreferences.getInstance();
+    var nic = await prefs.getString("nic");
+    var client = getClient();
+    var uri = BASE_URL + "/customer/enterQueue";
+    var body =
+        jsonEncode({"nic": nic, "stationID": stationID, "fuelType": fuelType});
+    print(uri);
+    print(body);
+    try {
+      var response = await client.post(
+        Uri.parse(uri),
+        headers: headers,
+        body: body,
+      );
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  http.Client getClient() {
+    return http.Client();
   }
 }
